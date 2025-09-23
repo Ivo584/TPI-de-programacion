@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Administración de Usuarios</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+  <header>
+    <img src="img/logo.png" alt="Logo del sistema" class="logo"/>
+    <nav>
+      <button onclick="mostrarTab('pendientes')">Usuarios Pendientes</button>
+      <button onclick="mostrarTab('activos')">Usuarios Activos</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="pendientes" class="tab">
+      <h2>Solicitudes de registro</h2>
+      <table>
+        <thead>
+          <tr><th>Usuario</th><th>Email</th><th>Fecha</th><th>Acciones</th></tr>
+        </thead>
+        <tbody id="tabla-pendientes"></tbody>
+      </table>
+    </section>
+
+    <section id="activos" class="tab" style="display:none">
+      <h2>Usuarios Registrados</h2>
+      <table>
+        <thead>
+          <tr><th>Usuario</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr>
+        </thead>
+        <tbody id="tabla-activos"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="js/script.js"></script>
+</body>
+</html>

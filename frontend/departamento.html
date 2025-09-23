@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Departamento de Alumnado</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+  <header>
+        <img
+  src="img/logo.png"
+  alt="Logo Colegio Ernesto Guevara"
+  class="mi-imagen"
+/>
+      <button onclick="mostrarTab('dashboard')">Dashboard</button>
+      <button onclick="mostrarTab('cargar-notas')">Cargar Notas</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="dashboard" class="tab">
+      <h2>Últimas notas cargadas</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Estudiante</th>
+            <th>Asignatura</th>
+            <th>Informe</th>              <!-- Nueva columna Informe -->
+            <th>Nota</th>
+            <th>Fecha de Registro</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-ultimas-notas">
+          <!-- JS inyecta filas aquí -->
+        </tbody>
+      </table>
+    </section>
+
+    <section id="cargar-notas" class="tab" style="display:none">
+      <h2>Formulario de carga de notas</h2>
+      <form id="form-notas">
+        <label>
+          Seleccionar estudiante
+          <select id="sel-estudiante"></select>
+        </label>
+
+        <label>
+          Seleccionar asignatura
+          <select id="sel-asignatura"></select>
+        </label>
+
+        <label>
+          Tipo de informe
+          <select id="sel-tipo-informe">
+            <option value="">-- Seleccionar --</option>
+          </select>
+        </label>
+
+        <label>
+          Ingresar nota
+          <input type="text" id="inp-nota"/>
+        </label>
+
+        <label>
+          Fecha
+          <input type="date" id="inp-fecha"/>
+        </label>
+
+        <button type="submit">Guardar Nota</button>
+      </form>
+    </section>
+  </main>
+
+  <script src="js/script.js"></script>
+</body>
+</html>

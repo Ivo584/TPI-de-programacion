@@ -1,0 +1,100 @@
+/* Reset básico */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Tipografía y fondo */
+body {
+  font-family: Arial, sans-serif;
+  color: #333;
+  background-color: #f5f5f5;
+}
+
+/* HEADER: logo, rol y navegación */
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #ff0000;
+  padding: 10px 20px;
+}
+
+.site-header .logo img {
+  height: 40px;
+}
+
+.site-header .role {
+  color: #fff;
+  font-size: 1.25rem;
+}
+
+.main-nav ul {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+}
+
+.main-nav a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.main-nav a:hover {
+  text-decoration: underline;
+}
+
+/* BANNER de bienvenida */
+.welcome {
+  background-color: #e0e0e0;
+  margin: 20px;
+  padding: 15px 20px;
+  border-radius: 5px;
+}
+
+.welcome p {
+  font-size: 1rem;
+}
+
+/* Sección de Notas Recientes */
+.recent-grades {
+  margin: 0 20px 40px;
+}
+
+.recent-grades h2 {
+  margin-bottom: 10px;
+  font-size: 1.5rem;
+  color: #004080;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+th, td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+thead {
+  background-color: #f0f0f0;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .site-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .main-nav ul {
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+  }
+}

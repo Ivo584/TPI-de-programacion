@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro de Usuario – Colegio Ernesto Guevara</title>
+  <link rel="stylesheet" href="css/style3.css" />
+
+</head>
+<body>
+  <div class="header-banner">
+    <div class="logo-slot">
+      <img src="img/logo.png" alt="Logo Colegio Ernesto Guevara" class="mi-imagen" />
+    </div>
+    <!-- Puedes agregar navegación aquí si lo deseas -->
+  </div>
+  <div class="page-wrap">
+    <form class="registration-form">
+
+      <!-- Indicación de campos obligatorios -->
+      <p class="form-note">
+        En este formulario hay campos obligatorios <span class="required-mark">❍</span>
+      </p>
+
+      <!-- Sección Credenciales -->
+      <section class="form-section">
+        <h2>Credenciales</h2>
+
+        <label for="username">
+          Nombre de usuario <span class="required-mark">❍</span>
+        </label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          required
+        />
+
+        <label for="password">
+          Contraseña <span class="required-mark">❍</span>
+        </label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          required
+        />
+        <small class="guideline">
+          La contraseña debería tener al menos 8 caracteres, al menos 1 dígito, al menos 1 minúscula
+        </small>
+      </section>
+
+      <!-- Sección Información Personal -->
+      <section class="form-section">
+        <h2>Por favor, escriba algunos datos sobre usted</h2>
+
+        <label for="email">
+          Dirección de correo <span class="required-mark">❍</span>
+        </label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          required
+        />
+
+        <label for="emailConfirm">
+          Correo (de nuevo) <span class="required-mark">❍</span>
+        </label>
+        <input
+          type="email"
+          id="emailConfirm"
+          name="emailConfirm"
+          required
+        />
+
+        <label for="firstName">
+          Nombre <span class="required-mark">❍</span>
+        </label>
+        <input
+          type="text"
+          id="firstName"
+          name="firstName"
+          required
+        />
+
+        <label for="lastName">
+          Apellido(s) <span class="required-mark">❍</span>
+        </label>
+        <input
+          type="text"
+          id="lastName"
+          name="lastName"
+          required
+        />
+
+        <label for="city">
+          Ciudad <span class="required-mark">❍</span>
+        </label>
+        <input
+          type="text"
+          id="city"
+          name="city"
+          required
+        />
+
+        <label for="country">
+          País <span class="required-mark">❍</span>
+        </label>
+        <select id="country" name="country" required>
+          <option value="">Seleccione un país</option>
+          <option value="AR" selected>Argentina</option>
+          <!-- Más opciones si es necesario -->
+        </select>
+      </section>
+
+      <!-- Sección Otros Campos -->
+      <section class="form-section">
+        <h2>Otros campos</h2>
+
+        <label for="dni">
+          DNI <span class="required-mark">❍</span>
+        </label>
+        <input
+          type="text"
+          id="dni"
+          name="dni"
+          required
+        />
+      </section>
+
+      <!-- Botones finales -->
+      <div class="form-actions">
+        <button type="submit">Crear cuenta</button>
+        <button type="button" onclick="location.href='index.html'">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</body>
+</html>
