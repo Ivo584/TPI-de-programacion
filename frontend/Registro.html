@@ -15,7 +15,7 @@
     <!-- Puedes agregar navegación aquí si lo deseas -->
   </div>
   <div class="page-wrap">
-    <form class="registration-form">
+    <form class="registration-form" id="registrationForm">
 
       <!-- Indicación de campos obligatorios -->
       <p class="form-note">
@@ -94,26 +94,6 @@
           required
         />
 
-        <label for="city">
-          Ciudad <span class="required-mark">❍</span>
-        </label>
-        <input
-          type="text"
-          id="city"
-          name="city"
-          required
-        />
-
-        <label for="country">
-          País <span class="required-mark">❍</span>
-        </label>
-        <select id="country" name="country" required>
-          <option value="">Seleccione un país</option>
-          <option value="AR" selected>Argentina</option>
-          <!-- Más opciones si es necesario -->
-        </select>
-      </section>
-
       <!-- Sección Otros Campos -->
       <section class="form-section">
         <h2>Otros campos</h2>
@@ -136,5 +116,27 @@
       </div>
     </form>
   </div>
+  <script>
+    document.getElementById('registrationForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const data = {
+        username: this.username.value,
+        password: this.password.value,
+        email: this.email.value,
+        emailConfirm: this.emailConfirm.value,
+        firstName: this.firstName.value,
+        lastName: this.lastName.value,
+        dni: this.dni.value
+      };
+      // Enviar al backend para crear usuario pendiente
+      await fetch('/api/registro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      alert('Registro enviado. Tu cuenta está pendiente de aprobación.');
+      window.location.href = 'index.html';
+    };
+  </script>
 </body>
 </html>

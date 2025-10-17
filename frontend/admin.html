@@ -4,39 +4,59 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Administración de Usuarios</title>
-  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="css/style5.css"/>
 </head>
 <body>
-  <header>
+  <header class="admin-header">
     <img src="img/logo.png" alt="Logo del sistema" class="logo"/>
-    <nav>
-      <button onclick="mostrarTab('pendientes')">Usuarios Pendientes</button>
-      <button onclick="mostrarTab('activos')">Usuarios Activos</button>
+    <nav class="admin-nav">
+      <button class="tab-btn" onclick="mostrarTab('pendientes')">Usuarios Pendientes</button>
+      <button class="tab-btn" onclick="mostrarTab('activos')">Usuarios Registrados</button>
     </nav>
   </header>
 
-  <main>
-    <section id="pendientes" class="tab">
-      <h2>Solicitudes de registro</h2>
-      <table>
-        <thead>
-          <tr><th>Usuario</th><th>Email</th><th>Fecha</th><th>Acciones</th></tr>
-        </thead>
-        <tbody id="tabla-pendientes"></tbody>
-      </table>
+  <main class="admin-main">
+    <section id="pendientes" class="tab active-tab">
+      <h2>Solicitudes de Registro</h2>
+      <div class="table-container">
+        <table class="styled-table">
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Email</th>
+              <th>Fecha</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-pendientes">
+            <!-- Los usuarios pendientes se llenan por JS -->
+          </tbody>
+        </table>
+      </div>
     </section>
 
-    <section id="activos" class="tab" style="display:none">
+    <section id="activos" class="tab">
       <h2>Usuarios Registrados</h2>
-      <table>
-        <thead>
-          <tr><th>Usuario</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr>
-        </thead>
-        <tbody id="tabla-activos"></tbody>
-      </table>
+      <div class="search-bar-container">
+        <input type="text" id="searchUser" placeholder="Buscar usuario..." oninput="filtrarUsuarios()"/>
+      </div>
+      <div class="table-container">
+        <table class="styled-table">
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Rol</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-activos">
+            <!-- Los usuarios activos se llenan por JS -->
+          </tbody>
+        </table>
+      </div>
     </section>
   </main>
 
-  <script src="js/script.js"></script>
+  <script src="js/script4.js"></script>
 </body>
 </html>

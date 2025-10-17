@@ -187,34 +187,30 @@ input:focus, select:focus{
   margin-top:6px;
 }
 
-/* Buttons */
-button{
-  cursor:pointer;
-  border:0;
-  padding:10px 16px;
-  border-radius:10px;
-  font-size:0.95rem;
-  font-weight:600;
-  transition:transform .08s ease, box-shadow .12s ease, opacity .12s ease;
+/* Botones uniformes */
+button,
+input[type="submit"],
+input[type="button"] {
+  cursor: pointer;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  background: linear-gradient(90deg, #ff3c3c 0%, #ff0000 100%);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(255,0,0,0.10);
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s, color 0.2s;
 }
 
-/* Botón principal rojo */
-button[type="submit"]{
-  background:linear-gradient(180deg, var(--brand), var(--brand-dark));
-  color:#fff;
-  box-shadow:0 8px 20px rgba(200,16,46,0.18);
+button:hover,
+input[type="submit"]:hover,
+input[type="button"]:hover {
+  background: linear-gradient(90deg, #d40000 0%, #ff3c3c 100%);
+  color: #ffdd57;
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 4px 16px rgba(255,0,0,0.18);
 }
-
-/* Botón secundario con borde rojo */
-button[type="button"]{
-  background:transparent;
-  color:var(--brand-dark);
-  border:1px solid rgba(200,16,46,0.12);
-}
-
-/* Button hover/active */
-button:hover{ transform:translateY(-2px) }
-button:active{ transform:translateY(0) }
 
 /* Accessibility: visible focus */
 button:focus, input:focus, select:focus{

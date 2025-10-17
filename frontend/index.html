@@ -6,63 +6,127 @@
   <title>Boletín Digital - Colegio Ernesto Guevara</title>
   <link rel="stylesheet" href="css/style.css"/>
   <style>
-    /* Modal styles */
+    /* Keyframes generales */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Aplicar fade-in cuando carga la página */
+    body {
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    /* Cabecera y contenido principal */
+    header, main {
+      animation: fadeIn 1s ease-out both;
+    }
+
+    nav a {
+      position: relative;
+      display: inline-block;
+      margin: 0 10px;
+      text-decoration: none;
+      color: #333;
+      transition: color 0.3s, transform 0.3s;
+    }
+    nav a:hover {
+      color: #0056b3;
+      transform: scale(1.05);
+    }
+
+    .acciones button {
+      cursor: pointer;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 10px 16px;
+      font-size: 1rem;
+      margin: 0 8px;
+      transition: transform 0.3s, background-color 0.3s, box-shadow 0.3s;
+    }
+    .acciones button:hover {
+      background-color: #0056b3;
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    /* Modal y contenido */
     .modal {
       display: none;
       position: fixed;
       z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
       overflow: auto;
       background-color: rgba(0,0,0,0.4);
+      animation: fadeIn 0.3s ease-out;
     }
     .modal-content {
       background-color: #fff;
-      margin: 10% auto;
+      margin: 8% auto;
       padding: 20px;
-      border: 1px solid #888;
-      width: 300px;
       border-radius: 8px;
+      width: 320px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      animation: slideDown 0.4s ease-out;
     }
+
     .close {
       color: #aaa;
       float: right;
       font-size: 28px;
       font-weight: bold;
       cursor: pointer;
+      transition: color 0.2s;
     }
-    .close:hover { color: #000; }
+    .close:hover {
+      color: #000;
+    }
+
     .modal-content input[type="text"],
     .modal-content input[type="password"] {
       width: 100%;
       padding: 8px;
       margin: 8px 0;
       box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      transition: border-color 0.3s;
+    }
+    .modal-content input:focus {
+      border-color: #007bff;
+      outline: none;
     }
     .modal-content button {
       width: 100%;
-      padding: 8px;
-      margin-top: 10px;
+      padding: 10px;
+      margin-top: 12px;
+      background-color: #28a745;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+    .modal-content button:hover {
+      background-color: #218838;
+      transform: translateY(-2px);
     }
   </style>
 </head>
 <body>
   <header>
     <section class="banner">
-     <img
-  src="img/logo.png"
-  alt="Logo Colegio Ernesto Guevara"
-  class="mi-imagen"
-/>
-
-
+      <img src="img/logo.png" alt="Logo Colegio Ernesto Guevara" class="mi-imagen"/>
     </section>
     <nav>
-      <a href="index.html">Inicio</a>
-      <a href="admin.html">Ingresar</a>
+      <a href="Identidad – Colegio Ernesto Guevara.html">Inicio</a>
+      <a href="#" id="nav-ingresar">Ingresar</a>
       <a href="Registro.html">Registro</a>
     </nav>
   </header>
@@ -94,26 +158,18 @@
 
   <script src="js/script.js"></script>
   <script>
-    // Modal logic
     const modal = document.getElementById('loginModal');
     const btnLogin = document.getElementById('btn-login');
     const closeModal = document.getElementById('closeModal');
+    const navIngresar = document.getElementById('nav-ingresar');
 
-    btnLogin.onclick = function() {
-      modal.style.display = "block";
-    }
-    closeModal.onclick = function() {
-      modal.style.display = "none";
-    }
-    window.onclick = function(event) {
-      if (event.target == modal) {
-        modal.style.display = "none";
-      }
-    }
-    // Prevent form submit (demo only)
-    modal.querySelector('form').onsubmit = function(e) {
+    btnLogin.onclick = () => modal.style.display = "block";
+    navIngresar.onclick = () => modal.style.display = "block";
+    closeModal.onclick = () => modal.style.display = "none";
+    window.onclick = e => { if (e.target == modal) modal.style.display = "none"; };
+
+    modal.querySelector('form').onsubmit = e => {
       e.preventDefault();
-      // Aquí puedes agregar la lógica de autenticación
       modal.style.display = "none";
     }
   </script>
