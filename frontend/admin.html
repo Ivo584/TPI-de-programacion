@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Administración de Usuarios</title>
+  <link rel="stylesheet" href="css/style5.css"/>
+</head>
+<body>
+  <header class="admin-header">
+    <img src="img/logo.png" alt="Logo del sistema" class="logo"/>
+    <nav class="admin-nav">
+      <button class="tab-btn" onclick="mostrarTab('pendientes')">Usuarios Pendientes</button>
+      <button class="tab-btn" onclick="mostrarTab('activos')">Usuarios Registrados</button>
+      <!-- Botón Volver añadido -->
+      <button class="tab-btn" onclick="window.location.href='index.html'" style="margin-left:8px;">Volver</button>
+    </nav>
+  </header>
+
+  <main class="admin-main">
+    <section id="pendientes" class="tab active-tab">
+      <h2>Solicitudes de Registro</h2>
+      <div class="table-container">
+        <table class="styled-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Estado</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-pendientes">
+            <!-- Los usuarios pendientes se llenan por JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="activos" class="tab">
+      <h2>Usuarios Registrados</h2>
+      <div class="search-bar-container">
+        <input type="text" id="searchUser" placeholder="Buscar usuario..." oninput="filtrarUsuarios()"/>
+      </div>
+      <div class="table-container">
+        <table class="styled-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-activos">
+            <!-- Los usuarios activos se llenan por JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/script4.js"></script>
+
+  <!-- Añadido: función mostrarTab y inicialización para asegurar que los botones funcionen
+       y que al mostrar "pendientes" se refresquen los datos desde el backend. -->
+  <script>
+    // Evita romper si script4.js no define refreshAll/render... (fallback seguro)
+    function mostrarTab(tabId) {
+      // ocultar todas las pestañas y activar la solicitada
+      document.querySelectorAll('.tab').forEach(sec => sec.classList.remove('active-tab'));
+      const target = document.getElementById(tabId);
+      if (target) target.classList.add('active-tab');
+
+      // ajustar clases de botones en la barra de navegación
+      document.querySelectorAll('.admin-nav button').forEach(btn => {
+        const dt = btn.getAttribute('data-target') || '';
+        btn.classList.toggle('is-active', dt === tabId);
+      });
+
+      // refrezcar contenido si existen las funciones del script4.js
+      if (typeof refreshAll === 'function') {
+        refreshAll();
+        return;
+      }
+      // fallback: intentar llamar a las funciones individuales
+      (async () => {
+        try {
+          if (typeof fetchPendientes === 'function' && typeof renderPendientesTable === 'function') {
+            const pendientes = await fetchPendientes();
+            renderPendientesTable(pendientes);
+          }
+          if (typeof fetchActivos === 'function' && typeof renderActivosTable === 'function') {
+            const activos = await fetchActivos();
+            renderActivosTable(activos);
+          }
+        } catch (e) {
+          console.warn('No se pudo refrescar desde mostrarTab:', e);
+        }
+      })();
+    }
+
+    // Asegurar que los botones tengan data-target y listener cuando falte el atributo/onclick
+    document.querySelectorAll('.admin-nav button').forEach((btn, i) => {
+      if (!btn.hasAttribute('data-target')) {
+        // si hay dos botones, asignar por orden; si hay más, dejar por seguridad
+        const defaultTarget = i === 0 ? 'pendientes' : 'activos';
+        btn.setAttribute('data-target', defaultTarget);
+      }
+      // si no hay onclick inline (o para robustez) añadir handler
+      btn.addEventListener('click', () => mostrarTab(btn.getAttribute('data-target')));
+    });
+
+    // forzar pestaña inicial y refrescar datos al cargar la página
+    document.addEventListener('DOMContentLoaded', () => {
+      mostrarTab('pendientes');
+    });
+
+    // Utilidades para mostrar usuarios
+    async function fetchPendientes() {
+      const res = await fetch('http://localhost:3003/api/usuarios/pendientes');
+      return await res.json();
+    }
+    async function fetchActivos() {
+      const res = await fetch('http://localhost:3003/api/usuarios/activos');
+      return await res.json();
+    }
+    function rolNombre(rol_id) {
+      if (rol_id == 1) return 'Estudiante';
+      if (rol_id == 2) return 'Profesor';
+      if (rol_id == 3) return 'Departamento';
+      if (rol_id == 4) return 'Admin';
+      return rol_id || '';
+    }
+    async function renderPendientesTable() {
+      const data = await fetchPendientes();
+      const tbody = document.getElementById('tabla-pendientes');
+      tbody.innerHTML = '';
+      data.forEach(u => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${u.id}</td>
+          <td>${u.nombre}</td>
+          <td>${u.email}</td>
+          <td>${rolNombre(u.rol_id)}</td>
+          <td>${u.estado}</td>
+          <td>
+            <button onclick="aprobarUsuario(${u.id})">Aprobar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+    async function renderActivosTable() {
+      const data = await fetchActivos();
+      const tbody = document.getElementById('tabla-activos');
+      tbody.innerHTML = '';
+      data.forEach(u => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${u.id}</td>
+          <td>${u.nombre}</td>
+          <td>${u.email}</td>
+          <td>${rolNombre(u.rol_id)}</td>
+          <td>${u.estado}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+    async function aprobarUsuario(id) {
+      if (!confirm('¿Aprobar este usuario?')) return;
+      await fetch('http://localhost:3003/api/usuarios/aprobar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      renderPendientesTable();
+      renderActivosTable();
+    }
+    // Inicialización
+    async function refreshAll() {
+      await renderPendientesTable();
+      await renderActivosTable();
+    }
+    window.refreshAll = refreshAll;
+    window.fetchPendientes = fetchPendientes;
+    window.fetchActivos = fetchActivos;
+    window.renderPendientesTable = renderPendientesTable;
+    window.renderActivosTable = renderActivosTable;
+    window.aprobarUsuario = aprobarUsuario;
+    document.addEventListener('DOMContentLoaded', refreshAll);
+  </script>
+</body>
+</html>

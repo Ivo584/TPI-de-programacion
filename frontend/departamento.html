@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Departamento de Alumnado</title>
+  <link rel="stylesheet" href="css/style4.css"/>
+</head>
+<body>
+  <header class="site-header">
+    <img src="img/logo.png" alt="Logo Colegio Ernesto Guevara" class="logo"/>
+    <nav>
+      <button class="tab-btn is-active" data-target="dashboard">Dashboard</button>
+      <button class="tab-btn" data-target="cargar-notas">Cargar Notas</button>
+      <button class="tab-btn" onclick="window.location.href='index.html'" style="margin-left:8px;">Volver</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Dashboard -->
+    <section id="dashboard" class="tab-content is-visible">
+      <!-- Barra de búsqueda -->
+      <div class="search-bar" style="margin-bottom: 1rem;">
+        <input type="text" id="search-alumno" placeholder="Buscar alumno por nombre y apellido..." style="width: 60%; padding: 0.5rem;"/>
+      </div>
+      <h2>Últimas notas cargadas</h2>
+      <table class="notes-table">
+        <thead>
+          <tr>
+            <th>Estudiante</th>
+            <th>Asignatura</th>
+            <th>Cuatrimestre</th>
+            <th>Informe</th>
+            <th>Nota</th>
+            <th>Fecha</th>
+            <th>Editar</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-ultimas-notas">
+          <!-- Filas inyectadas via JS -->
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Formulario de carga -->
+    <section id="cargar-notas" class="tab-content">
+      <h2>Formulario de carga de notas</h2>
+      <form id="form-notas" class="notes-form">
+        <div class="form-row">
+          <label for="sel-estudiante">Estudiante</label>
+          <select id="sel-estudiante" required>
+            <option value="">-- Seleccionar --</option>
+            <!-- Opciones llenadas dinámicamente por JS -->
+          </select>
+        </div>
+
+        <div class="form-row">
+          <label for="sel-asignatura">Asignatura</label>
+          <select id="sel-asignatura" required>
+            <option value="">-- Seleccionar --</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <label for="sel-cuatrimestre">Cuatrimestre</label>
+          <select id="sel-cuatrimestre" required>
+            <option value="">-- Seleccionar --</option>
+            <option>1° Cuatrimestre</option>
+            <option>2° Cuatrimestre</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <label for="sel-tipo-informe">Tipo de informe</label>
+          <select id="sel-tipo-informe" required>
+            <option value="">-- Seleccionar --</option>
+            <option>1° Informe</option>
+            <option>2° Informe</option>
+            <option>Final</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <label for="inp-nota">Nota</label>
+          <input type="number" id="inp-nota" min="0" max="10" step="0.1" required/>
+        </div>
+
+        <div class="form-row">
+          <label for="inp-fecha">Fecha</label>
+          <input type="date" id="inp-fecha" required/>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Guardar</button>
+          <button type="reset" class="btn">Limpiar</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script src="js/script3.js"></script>
+<script>
+  // Llenar estudiantes activos desde backend
+  async function cargarEstudiantesActivos() {
+    const sel = document.getElementById('sel-estudiante');
+    sel.innerHTML = '<option value="">-- Seleccionar --</option>';
+    try {
+      // Usar el endpoint correcto para estudiantes activos aprobados
+      const res = await fetch('http://localhost:3003/api/estudiantes-aprobados');
+      const data = await res.json();
+      // Ordenar alfabéticamente por apellido y nombre
+      data.sort((a, b) => (a.apellido + a.nombre).localeCompare(b.apellido + b.nombre));
+      // Filtrar duplicados por email
+      const vistos = new Set();
+      data = data.filter(e => {
+        if (vistos.has(e.email)) return false;
+        vistos.add(e.email);
+        return true;
+      });
+      data.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u.email;
+        opt.textContent = `${u.nombre} ${u.apellido}`.trim();
+        sel.appendChild(opt);
+      });
+      // Seleccionar automáticamente si viene de Cursos.html
+      const alumnoEmail = localStorage.getItem('seleccion_alumno_email');
+      if (alumnoEmail) {
+        sel.value = alumnoEmail;
+        localStorage.removeItem('seleccion_alumno_email');
+        // Cambiar a la pestaña de cargar notas si corresponde
+        if (window.location.search.includes('cargarNotas=1')) {
+          document.querySelector('[data-target="cargar-notas"]').click();
+        }
+      }
+    } catch (e) {
+      sel.innerHTML += '<option disabled>Error al cargar estudiantes</option>';
+    }
+  }
+  document.addEventListener('DOMContentLoaded', cargarEstudiantesActivos);
+
+  // Mostrar botón Cursos siempre (ya está visible)
+</script>
+</body>
+</html>

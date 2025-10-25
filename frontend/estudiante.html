@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Estudiante - Boletín Digital</title>
+  <link rel="stylesheet" href="css/style2.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="logo">
+      <img src="img/logo.png" alt="Logo Colegio Ernesto Guevara" />
+    </div>
+    <h1 class="role">Estudiante</h1>
+    <nav class="main-nav">
+      <ul>
+        <li><a href="perfil.html" id="perfil-link">Perfil</a></li>
+        <li><a href="#" id="salir-link">Salir</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section class="welcome">
+    <p>Bienvenido, <span id="student-name">[Nombre de estudiante]</span></p>
+  </section>
+
+  <main>
+    <section class="grades-section">
+      <h2>Boletín por Cuatrimestre</h2>
+      <div class="table-container">
+        <table class="grades-table">
+          <thead>
+            <tr>
+              <th rowspan="2">Asignatura</th>
+              <th colspan="3">1° Cuatrimestre</th>
+              <th colspan="3">2° Cuatrimestre</th>
+              <th rowspan="2">Nota Definitiva</th>
+            </tr>
+            <tr>
+              <th>1° Informe</th>
+              <th>2° Informe</th>
+              <th>Final</th>
+              <th>1° Informe</th>
+              <th>2° Informe</th>
+              <th>Final</th>
+            </tr>
+          </thead>
+          <tbody id="grades-body">
+            <!-- JavaScript inyecta filas aquí -->
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="7" class="total-label">Promedio de nota</td>
+              <td id="overall-average">-</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/script2.js"></script>
+  <script>
+    // Mostrar nombre y apellido del estudiante al cargar la página
+    document.addEventListener('DOMContentLoaded', function() {
+      const nombre = localStorage.getItem('usuario_nombre') || '';
+      let apellido = localStorage.getItem('usuario_apellido') || '';
+      // No mostrar "local" como apellido
+      if (apellido.trim().toLowerCase() === 'local') apellido = '';
+      const fullName = (nombre + (apellido ? ' ' + apellido : '')).trim();
+      if (fullName) {
+        document.getElementById('student-name').textContent = fullName;
+      }
+
+      // Mostrar notas del estudiante correcto si hay email en localStorage
+      const email = localStorage.getItem('usuario_email');
+      if (email) {
+        fetch('http://localhost:3001/api/notas?email=' + encodeURIComponent(email))
+          .then(res => {
+            if (!res.ok) throw new Error('Error al obtener notas');
+            return res.json();
+          })
+          .then(notas => {
+            // Log para depuración: muestra tipo y contenido exacto
+            console.log('Respuesta recibida del backend:', notas, 'Tipo:', typeof notas, 'Array:', Array.isArray(notas));
+            // Si la respuesta es un objeto con error, mostrar error
+            if (notas && typeof notas === 'object' && !Array.isArray(notas) && notas.error) {
+              document.getElementById('grades-body').innerHTML = '<tr><td colspan="8">Error al obtener notas.</td></tr>';
+              return;
+            }
+            // Si la respuesta es un array, renderizar normalmente
+            if (Array.isArray(notas)) {
+              if (notas.length === 0) {
+                document.getElementById('grades-body').innerHTML = '<tr><td colspan="8" style="text-align:center;">No hay notas registradas.</td></tr>';
+                document.getElementById('overall-average').textContent = '-';
+                return;
+              }
+              if (window.renderNotasEstudiante) {
+                window.renderNotasEstudiante(notas);
+              } else {
+                renderNotasEstudiante(notas);
+              }
+              return;
+            }
+            // Si la respuesta no es array ni error, mostrar error genérico
+            document.getElementById('grades-body').innerHTML = '<tr><td colspan="8">Error al obtener notas.</td></tr>';
+          })
+          .catch(err => {
+            console.error('Error en fetch de notas:', err);
+            document.getElementById('grades-body').innerHTML = '<tr><td colspan="8">Error al obtener notas.</td></tr>';
+          });
+      }
+    });
+
+    // Botón salir: redirige a index.html
+    document.getElementById('salir-link').addEventListener('click', function(e) {
+      e.preventDefault();
+      window.location.href = 'index.html';
+    });
+
+    // Renderizar notas en la tabla del boletín
+    function renderNotasEstudiante(notas) {
+      const tbody = document.getElementById('grades-body');
+      tbody.innerHTML = '';
+      if (!Array.isArray(notas) || !notas.length) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">No hay notas registradas.</td></tr>';
+        document.getElementById('overall-average').textContent = '-';
+        return;
+      }
+      // Agrupar por asignatura
+      const asignaturas = {};
+      notas.forEach(n => {
+        if (!asignaturas[n.asignatura]) asignaturas[n.asignatura] = {};
+        const key = `${n.cuatrimestre || ''}|${n.informe || ''}`;
+        asignaturas[n.asignatura][key] = n.nota;
+      });
+      let sum = 0, count = 0;
+      Object.keys(asignaturas).forEach(asig => {
+        const n = asignaturas[asig];
+        // Extraer cada campo
+        const n11 = n['1° Cuatrimestre|1° Informe'] || '';
+        const n12 = n['1° Cuatrimestre|2° Informe'] || '';
+        const n1f = n['1° Cuatrimestre|Final'] || '';
+        const n21 = n['2° Cuatrimestre|1° Informe'] || '';
+        const n22 = n['2° Cuatrimestre|2° Informe'] || '';
+        const n2f = n['2° Cuatrimestre|Final'] || '';
+        // Nota definitiva: promedio de los finales si existen, si no, vacío
+        let def = '';
+        const finals = [n1f, n2f].filter(x => x !== '');
+        if (finals.length) {
+          def = (finals.reduce((a, b) => Number(a) + Number(b), 0) / finals.length).toFixed(2);
+          sum += Number(def);
+          count++;
+        }
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${asig}</td>
+          <td>${n11}</td>
+          <td>${n12}</td>
+          <td>${n1f}</td>
+          <td>${n21}</td>
+          <td>${n22}</td>
+          <td>${n2f}</td>
+          <td>${def}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+      document.getElementById('overall-average').textContent = count ? (sum / count).toFixed(2) : '-';
+    }
+    window.renderNotasEstudiante = renderNotasEstudiante;
+  </script>
+</body>
+</html>
