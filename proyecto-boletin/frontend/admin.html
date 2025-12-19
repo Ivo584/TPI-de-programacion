@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Administración de Usuarios</title>
+  <link rel="stylesheet" href="css/style5.css"/>
+  <style>
+    /* Mantener el footer abajo */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    main.admin-main {
+      flex: 1 0 auto;
+    }
+    footer {
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<div id="editModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;">
+  <div style="background:#fff; padding:1rem 1.25rem; width:420px; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.2);">
+    <h3 style="margin-top:0;">Editar usuario</h3>
+    <form id="editForm">
+      <input type="hidden" id="edit-id" />
+      <div style="margin-bottom:0.5rem;">
+        <label style="display:block; font-weight:600;">Nombre</label>
+        <input id="edit-nombre" type="text" style="width:100%;" required />
+      </div>
+      <div style="margin-bottom:0.5rem;">
+        <label style="display:block; font-weight:600;">Apellido</label>
+        <input id="edit-apellido" type="text" style="width:100%;" />
+      </div>
+      <div style="margin-bottom:0.5rem;">
+        <label style="display:block; font-weight:600;">Email</label>
+        <input id="edit-email" type="email" style="width:100%;" required />
+      </div>
+      <div style="margin-bottom:0.5rem;">
+        <label style="display:block; font-weight:600;">DNI</label>
+        <input id="edit-dni" type="text" style="width:100%;" />
+      </div>
+      <div style="margin-bottom:0.75rem;">
+        <label style="display:block; font-weight:600;">Rol</label>
+        <select id="edit-rol" style="width:100%;">
+          <option value="1">Estudiante</option>
+          <option value="3">Departamento</option>
+          <option value="4">Admin</option>
+        </select>
+      </div>
+      <div style="text-align:right;">
+        <button type="button" id="editCancel">Cancelar</button>
+        <button type="submit" style="margin-left:8px;">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+<body>
+  <header class="admin-header">
+    <img src="img/logo.png" alt="Logo del sistema" class="logo"/>
+    <nav class="admin-nav">
+      <button class="tab-btn" onclick="mostrarTab('pendientes')">Usuarios Pendientes</button>
+      <button class="tab-btn" onclick="mostrarTab('activos')">Usuarios Registrados</button>
+      <!-- Botón Volver añadido -->
+      <button class="tab-btn" onclick="window.location.href='index.html'" style="margin-left:8px;">Volver</button>
+    </nav>
+  </header>
+
+  <main class="admin-main">
+    <section id="pendientes" class="tab active-tab">
+      <h2>Solicitudes de Registro</h2>
+      <div class="table-container">
+        <table class="styled-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Estado</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-pendientes">
+            <!-- Los usuarios pendientes se llenan por JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="activos" class="tab">
+      <h2>Usuarios Registrados</h2>
+      <div class="search-bar-container">
+        <input type="text" id="searchUser" placeholder="Buscar usuario..." oninput="filtrarUsuarios()"/>
+      </div>
+      <div class="table-container">
+        <table class="styled-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Estado</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-activos">
+            <!-- Los usuarios activos se llenan por JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/script4.js"></script>
+
+  <!-- Añadido: función mostrarTab y inicialización para asegurar que los botones funcionen
+       y que al mostrar "pendientes" se refresquen los datos desde el backend. -->
+  <script>
+    // Evita romper si script4.js no define refreshAll/render... (fallback seguro)
+    function mostrarTab(tabId) {
+      // ocultar todas las pestañas y activar la solicitada
+      document.querySelectorAll('.tab').forEach(sec => sec.classList.remove('active-tab'));
+      const target = document.getElementById(tabId);
+      if (target) target.classList.add('active-tab');
+
+      // ajustar clases de botones en la barra de navegación
+      document.querySelectorAll('.admin-nav button').forEach(btn => {
+        const dt = btn.getAttribute('data-target') || '';
+        btn.classList.toggle('is-active', dt === tabId);
+      });
+
+      // refrezcar contenido si existen las funciones del script4.js
+      if (typeof refreshAll === 'function') {
+        refreshAll();
+        return;
+      }
+      // fallback: intentar llamar a las funciones individuales
+      (async () => {
+        try {
+          if (typeof fetchPendientes === 'function' && typeof renderPendientesTable === 'function') {
+            const pendientes = await fetchPendientes();
+            renderPendientesTable(pendientes);
+          }
+          if (typeof fetchActivos === 'function' && typeof renderActivosTable === 'function') {
+            const activos = await fetchActivos();
+            renderActivosTable(activos);
+          }
+        } catch (e) {
+          console.warn('No se pudo refrescar desde mostrarTab:', e);
+        }
+      })();
+    }
+
+    // Asegurar que los botones tengan data-target y listener cuando falte el atributo/onclick
+    document.querySelectorAll('.admin-nav button').forEach((btn, i) => {
+      if (!btn.hasAttribute('data-target')) {
+        // si hay dos botones, asignar por orden; si hay más, dejar por seguridad
+        const defaultTarget = i === 0 ? 'pendientes' : 'activos';
+        btn.setAttribute('data-target', defaultTarget);
+      }
+      // si no hay onclick inline (o para robustez) añadir handler
+      btn.addEventListener('click', () => mostrarTab(btn.getAttribute('data-target')));
+    });
+
+    // forzar pestaña inicial y refrescar datos al cargar la página
+    document.addEventListener('DOMContentLoaded', () => {
+      mostrarTab('pendientes');
+    });
+
+  </script>
+  <script>
+    
+  // --- Utilidades existentes (mantener) ---
+  function rolNombre(rol_id) {
+    if (rol_id == 1) return 'Estudiante';
+    if (rol_id == 2) return 'Profesor';
+    if (rol_id == 3) return 'Departamento';
+    if (rol_id == 4) return 'Admin';
+    return rol_id || '';
+  }
+
+  async function fetchPendientes() {
+    const res = await fetch('http://localhost:3003/api/usuarios/pendientes');
+    if (!res.ok) throw new Error('Error al obtener pendientes');
+    return await res.json();
+  }
+  async function fetchActivos() {
+    const res = await fetch('http://localhost:3003/api/usuarios/activos');
+    if (!res.ok) throw new Error('Error al obtener activos');
+    return await res.json();
+  }
+
+  // --- Render tabla de pendientes (ahora con botón Rechazar) ---
+  async function renderPendientesTable() {
+    let data = [];
+    try {
+      data = await fetchPendientes();
+    } catch (err) {
+      console.error('No se pudieron cargar pendientes:', err);
+      const tbodyErr = document.getElementById('tabla-pendientes');
+      if (tbodyErr) tbodyErr.innerHTML = '<tr><td colspan="6">Error al cargar solicitudes</td></tr>';
+      return;
+    }
+
+    const tbody = document.getElementById('tabla-pendientes');
+    tbody.innerHTML = '';
+    data.forEach(u => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${u.id}</td>
+        <td>${u.nombre}</td>
+        <td>${u.email}</td>
+        <td>${rolNombre(u.rol_id)}</td>
+        <td>${u.estado}</td>
+        <td>
+          <button class="btn-approve" onclick="aprobarUsuario(${u.id})">Aprobar</button>
+          <button class="btn-reject" onclick="rechazarUsuario(${u.id})" style="margin-left:8px;">Rechazar</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    if (!data.length) {
+      tbody.innerHTML = '<tr><td colspan="6">No hay solicitudes pendientes</td></tr>';
+    }
+  }
+
+  // --- Aprobar (mantener, con manejo de errores) ---
+  async function aprobarUsuario(id) {
+    if (!confirm('¿Aprobar este usuario?')) return;
+    try {
+      const res = await fetch('http://localhost:3003/api/usuarios/aprobar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      if (!res.ok) throw new Error('Error al aprobar');
+      // refrescar tablas
+      await renderPendientesTable();
+      await renderActivosTable();
+      alert('Usuario aprobado correctamente.');
+    } catch (err) {
+      console.error('Error al aprobar usuario:', err);
+      alert('No se pudo aprobar el usuario. Revisa la consola.');
+    }
+  }
+
+  // --- Nueva función: Rechazar (elimina en la BD usando tu endpoint) ---
+  async function rechazarUsuario(id) {
+    if (!confirm('¿Rechazar y eliminar este usuario? Esta acción no se puede deshacer.')) return;
+    try {
+      const res = await fetch('http://localhost:3003/api/usuarios/rechazar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      if (!res.ok) {
+        const errBody = await res.json().catch(()=>null);
+        throw new Error(errBody && errBody.error ? errBody.error : 'Error en servidor');
+      }
+      // Actualizar la vista: quitar fila y refrescar tablas
+      await renderPendientesTable();
+      await renderActivosTable();
+      alert('Usuario rechazado y eliminado correctamente.');
+    } catch (err) {
+      console.error('Error al rechazar usuario:', err);
+      alert('No se pudo rechazar el usuario. Revisa la consola.');
+    }
+  }
+
+  // --- Render tabla de activos (sin cambios funcionales) ---
+  async function renderActivosTable() {
+    let data = [];
+    try {
+      data = await fetchActivos();
+    } catch (err) {
+      console.error('No se pudieron cargar activos:', err);
+      const tbodyErr = document.getElementById('tabla-activos');
+      if (tbodyErr) tbodyErr.innerHTML = '<tr><td colspan="5">Error al cargar usuarios activos</td></tr>';
+      return;
+    }
+
+    const tbody = document.getElementById('tabla-activos');
+    tbody.innerHTML = '';
+    data.forEach(u => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${u.id}</td>
+        <td>${u.nombre}</td>
+        <td>${u.email}</td>
+        <td>${rolNombre(u.rol_id)}</td>
+        <td>${u.estado}</td>
+        <td>
+          <button class="btn-edit" onclick="editarUsuario(${u.id})">Editar</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    if (!data.length) {
+      tbody.innerHTML = '<tr><td colspan="5">No hay usuarios activos</td></tr>';
+    }
+  }
+
+  // --- Nueva función: Editar usuario (abre el modal con datos) ---
+  function editarUsuario(id) {
+    const usuario = Array.from(document.querySelectorAll('#tabla-activos tr'))
+      .map(tr => {
+        const tds = tr.querySelectorAll('td');
+        return {
+          id: tds[0].innerText,
+          nombre: tds[1].innerText,
+          email: tds[2].innerText,
+          rol_id: tds[3].innerText === 'Estudiante' ? 1 :
+                  tds[3].innerText === 'Profesor' ? 2 :
+                  tds[3].innerText === 'Departamento' ? 3 : 4,
+          estado: tds[4].innerText
+        };
+      })
+      .find(u => u.id == id);
+
+    if (!usuario) return alert('Usuario no encontrado');
+
+    // llenar el formulario del modal con los datos del usuario
+    document.getElementById('edit-id').value = usuario.id;
+    document.getElementById('edit-nombre').value = usuario.nombre;
+    document.getElementById('edit-email').value = usuario.email;
+    document.getElementById('edit-dni').value = ''; // DNI no disponible en la tabla
+    document.getElementById('edit-rol').value = usuario.rol_id;
+    // mostrar el modal
+    document.getElementById('editModal').style.display = 'flex';
+  }
+
+  // --- Guardar cambios de edición (nuevo endpoint y manejo de errores) ---
+  document.getElementById('editForm').onsubmit = async function(e) {
+    e.preventDefault();
+    const id = document.getElementById('edit-id').value;
+    const nombre = document.getElementById('edit-nombre').value;
+    const email = document.getElementById('edit-email').value;
+    const dni = document.getElementById('edit-dni').value;
+    const rol_id = document.getElementById('edit-rol').value;
+
+    if (!id || !nombre || !email || !rol_id) {
+      return alert('Completa todos los campos requeridos');
+    }
+
+    try {
+      const res = await fetch('http://localhost:3003/api/usuarios/editar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, nombre, email, dni, rol_id })
+      });
+      if (!res.ok) {
+        const errBody = await res.json().catch(()=>null);
+        throw new Error(errBody && errBody.error ? errBody.error : 'Error en servidor');
+      }
+      alert('Usuario actualizado correctamente');
+      // cerrar el modal
+      document.getElementById('editModal').style.display = 'none';
+      // refrescar tablas
+      await renderPendientesTable();
+      await renderActivosTable();
+    } catch (err) {
+      console.error('Error al editar usuario:', err);
+      alert('No se pudo editar el usuario. Revisa la consola.');
+    }
+  };
+
+  // --- Inicialización y exportación a window (compatibilidad con tu script) ---
+  async function refreshAll() {
+    await renderPendientesTable();
+    await renderActivosTable();
+  }
+  window.refreshAll = refreshAll;
+  window.fetchPendientes = fetchPendientes;
+  window.fetchActivos = fetchActivos;
+  window.renderPendientesTable = renderPendientesTable;
+  window.renderActivosTable = renderActivosTable;
+  window.aprobarUsuario = aprobarUsuario;
+  window.rechazarUsuario = rechazarUsuario;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // forzar pestaña inicial y refrescar datos
+    if (typeof mostrarTab === 'function') mostrarTab('pendientes');
+    refreshAll();
+  });
+</script>
+  <footer style="margin-top:1.2rem; background:#ff0000; color:#fff; font-size:0.85rem; text-align:center; padding:6px 0;">
+    © Colegio Ernesto Guevara – Sistema de Boletín Digital. Desarrollado por Aperture Science Innovation.
+  </footer>
+</body>
+</html>
